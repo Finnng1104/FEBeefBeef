@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import create from "react-canvas-confetti";
+import ReactCanvasConfetti from "react-canvas-confetti";
 
 interface BirthdayAnimationProps {
   username: string;
@@ -15,32 +15,61 @@ const BirthdayAnimation = ({
   isVisible,
 }: BirthdayAnimationProps) => {
   const [visible, setVisible] = useState(true);
-  const canvasInstance = useRef<any>(null);
+  const refAnimationInstance = useRef<any>(null);
 
-  const fireRealistic = useCallback(() => {
-    if (!canvasInstance.current) return;
-    canvasInstance.current({
-      particleCount: 200,
-      spread: 90,
-      origin: { y: 0.6 },
-    });
+  // Hàm bắn confetti
+  const makeShot = useCallback((particleRatio: number, opts: any) => {
+    if (refAnimationInstance.current) {
+      refAnimationInstance.current({
+        ...opts,
+        origin: { y: 0.6 },
+        particleCount: Math.floor(200 * particleRatio),
+      });
+    }
   }, []);
 
-  const fireFireworks = useCallback(() => {
-    if (!canvasInstance.current) return;
-    canvasInstance.current({
-      particleCount: 100,
-      spread: 360,
-      startVelocity: 40,
-      origin: { y: 0.5 },
+  const fireRealistic = useCallback(() => {
+    makeShot(0.25, {
+      spread: 26,
+      startVelocity: 55,
     });
+    makeShot(0.2, {
+      spread: 60,
+    });
+    makeShot(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8,
+    });
+    makeShot(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2,
+    });
+    makeShot(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    });
+  }, [makeShot]);
+
+  const fireFireworks = useCallback(() => {
+    if (refAnimationInstance.current) {
+      refAnimationInstance.current({
+        particleCount: 100,
+        spread: 360,
+        startVelocity: 40,
+        origin: { y: 0.5 },
+      });
+    }
+  }, []);
+
+  // Lưu instance của confetti
+  const handleInit = useCallback((params: { confetti: any }) => {
+    refAnimationInstance.current = params.confetti;
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && !canvasInstance.current) {
-      canvasInstance.current = create({});
-    }
-
     if (isVisible) {
       setVisible(true);
       fireRealistic();
@@ -62,6 +91,17 @@ const BirthdayAnimation = ({
     <AnimatePresence>
       {isVisible && visible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-85">
+          <ReactCanvasConfetti
+            onInit={handleInit}
+            style={{
+              position: "fixed",
+              pointerEvents: "none",
+              width: "100vw",
+              height: "100vh",
+              top: 0,
+              left: 0,
+            }}
+          />
           <div className="relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
