@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { useEffect, useCallback, useRef, useState } from "react";
+import React, { useEffect, useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Realistic from "react-canvas-confetti/dist/presets/realistic";
-import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
+import create from "react-canvas-confetti";
 
 interface BirthdayAnimationProps {
   username: string;
@@ -17,19 +15,32 @@ const BirthdayAnimation = ({
   isVisible,
 }: BirthdayAnimationProps) => {
   const [visible, setVisible] = useState(true);
+  const canvasInstance = useRef<any>(null);
 
   const fireRealistic = useCallback(() => {
-    Realistic({});
+    if (!canvasInstance.current) return;
+    canvasInstance.current({
+      particleCount: 200,
+      spread: 90,
+      origin: { y: 0.6 },
+    });
   }, []);
 
   const fireFireworks = useCallback(() => {
-    Fireworks({});
+    if (!canvasInstance.current) return;
+    canvasInstance.current({
+      particleCount: 100,
+      spread: 360,
+      startVelocity: 40,
+      origin: { y: 0.5 },
+    });
   }, []);
 
-  const realisticConductorRef = useRef<any>(null);
-  const fireworksConductorRef = useRef<any>(null);
-
   useEffect(() => {
+    if (typeof window !== "undefined" && !canvasInstance.current) {
+      canvasInstance.current = create({});
+    }
+
     if (isVisible) {
       setVisible(true);
       fireRealistic();
@@ -43,8 +54,6 @@ const BirthdayAnimation = ({
   }, [fireRealistic, fireFireworks, isVisible]);
 
   const handleThankYouClick = () => {
-    realisticConductorRef.current?.stop();
-    fireworksConductorRef.current?.stop();
     setVisible(false);
     if (onComplete) onComplete();
   };
@@ -53,36 +62,6 @@ const BirthdayAnimation = ({
     <AnimatePresence>
       {isVisible && visible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-85">
-          <div className="absolute inset-0">
-            <Realistic
-              autorun={{ speed: 0.3 }}
-              onInit={({ conductor }) =>
-                (realisticConductorRef.current = conductor)
-              }
-              style={{
-                position: "absolute",
-                pointerEvents: "none",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-              }}
-            />
-            <Fireworks
-              autorun={{ speed: 3 }}
-              onInit={({ conductor }) =>
-                (fireworksConductorRef.current = conductor)
-              }
-              style={{
-                position: "absolute",
-                pointerEvents: "none",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-              }}
-            />
-          </div>
           <div className="relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -100,7 +79,7 @@ const BirthdayAnimation = ({
                   damping: 20,
                   duration: 1.5,
                 }}
-                className="text-5xl font-bold text-secondaryColor  mb-4"
+                className="text-5xl font-bold text-secondaryColor mb-4"
               >
                 🎉 Happy Birthday! 🎉
               </motion.h1>
@@ -111,7 +90,7 @@ const BirthdayAnimation = ({
                 className="text-3xl text-white font-semibold"
               >
                 {username}
-                <p className="mt-2 text-lg text-secondaryColor ">
+                <p className="mt-2 text-lg text-secondaryColor">
                   Chúc {username} luôn ngon miệng, vui vẻ và tràn đầy hương vị
                   hạnh phúc!
                 </p>
@@ -121,7 +100,7 @@ const BirthdayAnimation = ({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 3 }}
                 onClick={handleThankYouClick}
-                className="mt-8 px-6 py-2 bg-secondaryColor  text-black rounded-full hover:bg-yellow-500 transition-colors"
+                className="mt-8 px-6 py-2 bg-secondaryColor text-black rounded-full hover:bg-yellow-500 transition-colors"
               >
                 Thank you!
               </motion.button>
