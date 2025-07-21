@@ -1,7 +1,9 @@
-import { useEffect, useCallback, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Realistic from 'react-canvas-confetti/dist/presets/realistic';
-import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Realistic from "react-canvas-confetti/dist/presets/realistic";
+import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
 
 interface BirthdayAnimationProps {
   username: string;
@@ -9,17 +11,19 @@ interface BirthdayAnimationProps {
   isVisible: boolean;
 }
 
-const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimationProps) => {
-  const [visible, setVisible] = useState(true); 
+const BirthdayAnimation = ({
+  username,
+  onComplete,
+  isVisible,
+}: BirthdayAnimationProps) => {
+  const [visible, setVisible] = useState(true);
 
   const fireRealistic = useCallback(() => {
-    Realistic({
-    });
+    Realistic({});
   }, []);
 
   const fireFireworks = useCallback(() => {
-    Fireworks({
-    });
+    Fireworks({});
   }, []);
 
   const realisticConductorRef = useRef<any>(null);
@@ -27,7 +31,7 @@ const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimatio
 
   useEffect(() => {
     if (isVisible) {
-      setVisible(true); 
+      setVisible(true);
       fireRealistic();
       fireFireworks();
       const interval = setInterval(() => {
@@ -52,24 +56,28 @@ const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimatio
           <div className="absolute inset-0">
             <Realistic
               autorun={{ speed: 0.3 }}
-              onInit={({ conductor }) => (realisticConductorRef.current = conductor)}
+              onInit={({ conductor }) =>
+                (realisticConductorRef.current = conductor)
+              }
               style={{
-                position: 'absolute',
-                pointerEvents: 'none',
-                width: '100%',
-                height: '100%',
+                position: "absolute",
+                pointerEvents: "none",
+                width: "100%",
+                height: "100%",
                 top: 0,
                 left: 0,
               }}
             />
             <Fireworks
               autorun={{ speed: 3 }}
-              onInit={({ conductor }) => (fireworksConductorRef.current = conductor)}
+              onInit={({ conductor }) =>
+                (fireworksConductorRef.current = conductor)
+              }
               style={{
-                position: 'absolute',
-                pointerEvents: 'none',
-                width: '100%',
-                height: '100%',
+                position: "absolute",
+                pointerEvents: "none",
+                width: "100%",
+                height: "100%",
                 top: 0,
                 left: 0,
               }}
@@ -87,7 +95,7 @@ const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimatio
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
                 transition={{
-                  type: 'spring',
+                  type: "spring",
                   stiffness: 260,
                   damping: 20,
                   duration: 1.5,
@@ -104,7 +112,8 @@ const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimatio
               >
                 {username}
                 <p className="mt-2 text-lg text-secondaryColor ">
-                  Chúc {username} luôn ngon miệng, vui vẻ và tràn đầy hương vị hạnh phúc!
+                  Chúc {username} luôn ngon miệng, vui vẻ và tràn đầy hương vị
+                  hạnh phúc!
                 </p>
               </motion.div>
               <motion.button
