@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import InputComponent from '../components/pages/Login/InputComponents';
-import ButtonComponent from '../components/pages/Login/ButtonComponents';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { SlActionUndo } from 'react-icons/sl';
-import { toast } from 'react-toastify';
-import { useChangePassword } from '../hooks/useAuth';
-import { changePasswordSchema, ChangePasswordSchema } from '../types/Auth.type';
+import InputComponent from "../components/pages/login/InputComponents";
+import ButtonComponent from "../components/pages/login/ButtonComponents";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { SlActionUndo } from "react-icons/sl";
+import { toast } from "react-toastify";
+import { useChangePassword } from "../hooks/useAuth";
+import { changePasswordSchema, ChangePasswordSchema } from "../types/Auth.type";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
-  const loginPath = location.state?.loginPath || '/login';
+  const loginPath = location.state?.loginPath || "/login";
 
   const {
     control,
@@ -26,19 +26,18 @@ const ResetPassword = () => {
   } = useForm<ChangePasswordSchema>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      newPassword: '',
-      confirmPassword: '',
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
   const { changePassword, loading, error } = useChangePassword();
-  const newPasswordValue = watch('newPassword');
-  const confirmPasswordValue = watch('confirmPassword');
+  const newPasswordValue = watch("newPassword");
+  const confirmPasswordValue = watch("confirmPassword");
 
- 
   useEffect(() => {
     if (!email) {
-      navigate('/forgot-password');
+      navigate("/forgot-password");
     }
   }, [email, navigate]);
 
@@ -47,7 +46,7 @@ const ResetPassword = () => {
   //      if (error === 'Password changed successfully') {
   //         toast.success('Mật khẩu đã được thay đổi thành công!');
   //         navigate('/login');
-  //      } 
+  //      }
   //    }
   //  }, [error]);
 
@@ -56,18 +55,18 @@ const ResetPassword = () => {
       const res = await changePassword(
         email,
         data.newPassword,
-        data.confirmPassword,
+        data.confirmPassword
       );
-      if (res && res.message === 'Password changed successfully') {
-        toast.success('Mật khẩu đã được thay đổi thành công!');
+      if (res && res.message === "Password changed successfully") {
+        toast.success("Mật khẩu đã được thay đổi thành công!");
         navigate(loginPath);
-      } else if (res && res.message === 'Invalid password format') {
-        toast.error('Mật khẩu không hợp lệ!');
-      } else if (res && res.message === 'Passwords do not match') {
-        toast.error('Mật khẩu không khớp!');
+      } else if (res && res.message === "Invalid password format") {
+        toast.error("Mật khẩu không hợp lệ!");
+      } else if (res && res.message === "Passwords do not match") {
+        toast.error("Mật khẩu không khớp!");
       }
     } catch (err: any) {
-      console.log('API error:', err?.response?.data);
+      console.log("API error:", err?.response?.data);
     }
   };
 
