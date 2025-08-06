@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { useEffect, useCallback, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Realistic from "react-canvas-confetti/dist/presets/realistic";
-import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
+import { useEffect, useCallback, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Realistic from 'react-canvas-confetti/dist/presets/realistic';
+import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
 import GlobalModal from "@/components/common/GlobalModal";
 
 interface BirthdayAnimationProps {
@@ -12,19 +10,17 @@ interface BirthdayAnimationProps {
   isVisible: boolean;
 }
 
-const BirthdayAnimation = ({
-  username,
-  onComplete,
-  isVisible,
-}: BirthdayAnimationProps) => {
-  const [visible, setVisible] = useState(true);
+const BirthdayAnimation = ({ username, onComplete, isVisible }: BirthdayAnimationProps) => {
+  const [visible, setVisible] = useState(true); 
 
   const fireRealistic = useCallback(() => {
-    Realistic({});
+    Realistic({
+    });
   }, []);
 
   const fireFireworks = useCallback(() => {
-    Fireworks({});
+    Fireworks({
+    });
   }, []);
 
   const realisticConductorRef = useRef<any>(null);
@@ -32,7 +28,7 @@ const BirthdayAnimation = ({
 
   useEffect(() => {
     if (isVisible) {
-      setVisible(true);
+      setVisible(true); 
       fireRealistic();
       fireFireworks();
       const interval = setInterval(() => {
@@ -62,10 +58,10 @@ const BirthdayAnimation = ({
                   (realisticConductorRef.current = conductor)
                 }
                 style={{
-                  position: "absolute",
-                  pointerEvents: "none",
-                  width: "100%",
-                  height: "100%",
+                  position: 'absolute',
+                  pointerEvents: 'none',
+                  width: '100%',
+                  height: '100%',
                   top: 0,
                   left: 0,
                 }}
@@ -76,10 +72,10 @@ const BirthdayAnimation = ({
                   (fireworksConductorRef.current = conductor)
                 }
                 style={{
-                  position: "absolute",
-                  pointerEvents: "none",
-                  width: "100%",
-                  height: "100%",
+                  position: 'absolute',
+                  pointerEvents: 'none',
+                  width: '100%',
+                  height: '100%',
                   top: 0,
                   left: 0,
                 }}
@@ -100,7 +96,7 @@ const BirthdayAnimation = ({
                   initial={{ scale: 0.5 }}
                   animate={{ scale: 1 }}
                   transition={{
-                    type: "spring",
+                    type: 'spring',
                     stiffness: 260,
                     damping: 20,
                     duration: 1.5,

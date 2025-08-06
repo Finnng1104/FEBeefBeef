@@ -10,7 +10,7 @@ export const usePosts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get('page')) || 1;
-  const limit = Number(searchParams.get('limit')) || 10;
+  const limit = Number(searchParams.get('limit')) || 12;
   const search = searchParams.get('search') || '';
   const sortBy = searchParams.get('sortBy') || 'createdAt';
   const sortOrder = searchParams.get('sortOrder') || 'desc';
@@ -20,7 +20,8 @@ export const usePosts = () => {
     limit,
     search,
     sortBy,
-    sortOrder: sortOrder as 'asc' | 'desc'
+    sortOrder: sortOrder as 'asc' | 'desc',
+    status: 'published', // Luôn lấy bài đã xuất bản
   };
 
   const { data, isLoading: isLoadingPosts, error } = useQuery({

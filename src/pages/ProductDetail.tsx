@@ -1,60 +1,67 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useFoodDetail } from '../hooks/useFoods';
 import { useProductView } from '../hooks/useProductView';
 import RelatedProductList from '../components/pages/detail/RelatedProductList';
-import BreadCrumbComponents from '../components/common/BreadCrumbComponents';
+
 import ProductGallery from '../components/pages/detail/ProductGallery';
 import ProductInfo from '../components/pages/detail/ProductInfo';
 import ProductPolicies from '../components/pages/detail/ProductPolicies';
 import ProductTabs from '../components/pages/detail/ProductTabs';
 import ProductReviews from '..//components/pages/detail/ProductReviews';
-import { useLocation } from 'react-router-dom';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
 
 const ProductDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { food, loading, error } = useFoodDetail(slug || '');
   const productId = food?._id || '';
 
-  const shouldOpenReviewTab = location.state?.openReview === true;
+  const shouldOpenReviewTab = searchParams.get('review') === 'true';
 
   useProductView(productId);
 
- 
-
-   const tabs = food ? [
-    {
-      id: 'description',
-      title: 'Mô tả',
-      content: food.description || 'Chưa có mô tả cho sản phẩm này.',
-    },
-    {
-      id: 'details',
-      title: 'Chi tiết sản phẩm',
-      content: food.ingredients 
-  ? `Nguyên liệu: ${food.ingredients}` 
-  : 'Chưa có thông tin chi tiết cho sản phẩm này.',
-    },
-    {
-      id: 'reviews',
-      title: 'Đánh giá',
-      content: (
-        <ProductReviews
-          productId={food._id}
-          productName={food.name}
-          averageRating={food.average_rating || 0}
-          ratingCount={food.rating_count || 0}
-          scrollToForm={shouldOpenReviewTab}
-        />
-      ),
-    },
-  ] : [];
+  const tabs = food
+    ? [
+        {
+          id: 'description',
+          title: 'Mô tả',
+          content: food.description || 'Chưa có mô tả cho sản phẩm này.',
+        },
+        {
+          id: 'details',
+          title: 'Chi tiết sản phẩm',
+          content: food.ingredients
+            ? `Nguyên liệu: ${food.ingredients}`
+            : 'Chưa có thông tin chi tiết cho sản phẩm này.',
+        },
+        {
+          id: 'reviews',
+          title: 'Đánh giá',
+          content: (
+            <ProductReviews
+              productId={food._id}
+              productName={food.name}
+              averageRating={food.average_rating || 0}
+              ratingCount={food.rating_count || 0}
+              scrollToForm={shouldOpenReviewTab}
+            />
+          ),
+        },
+        {
+          id: 'policies',
+          title: 'Chính sách',
+          content: (
+            <div className="pb-4">
+              <ProductPolicies />
+            </div>
+          ),
+        },
+      ]
+    : [];
 
   if (loading) {
-    return (
-      <div className="text-center text-white py-20">Đang tải sản phẩm...</div>
-    );
+    return <LoadingOverlay loading={true} />;
   }
 
   if (error || !food) {
@@ -67,7 +74,6 @@ const ProductDetail: React.FC = () => {
 
   return (
     <>
-      <BreadCrumbComponents />
       <section className="bg-bodyBackground w-full text-white py-16">
         <div className="w-11/12 md:w-container95 lg:w-container95 xl:w-container95 2xl:w-mainContainer mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -107,14 +113,14 @@ const ProductDetail: React.FC = () => {
                 )}
                 sku={food._id}
               />
-              <div className="mt-8 hidden 2xl:block">
-                <ProductPolicies />
-              </div>
             </div>
           </div>
 
           {/* <ProductTabs tabs={tabs} /> */}
-          <ProductTabs tabs={tabs} defaultOpenTab={shouldOpenReviewTab ? 'reviews' : null} />
+          <ProductTabs
+            tabs={tabs}
+            defaultOpenTab={shouldOpenReviewTab ? 'reviews' : null}
+          />
 
           <RelatedProductList
             categories={food.categories.map((c) =>
