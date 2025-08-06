@@ -38,10 +38,10 @@ export default {
       },
       fontFamily: {
         sans: ["Manrope", ...defaultTheme.fontFamily.sans],
-        restora: ["Restora", ...defaultTheme.fontFamily.serif],
+        restora: ['"Playfair Display"', ...defaultTheme.fontFamily.serif],
         roboto: ["Roboto", ...defaultTheme.fontFamily.sans],
         poppins: ["Poppins", ...defaultTheme.fontFamily.sans],
-        heading: ["Restora", ...defaultTheme.fontFamily.serif],
+        heading: ['"Playfair Display"', ...defaultTheme.fontFamily.serif],
         button: ["Poppins", ...defaultTheme.fontFamily.sans],
         body: ["Roboto", ...defaultTheme.fontFamily.sans],
         cormorant: ["'Cormorant Garamond'", "serif"],
