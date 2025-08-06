@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import { RegisterUser } from "../redux/feature/auth/authActions";
 import { clearStatus } from "../redux/feature/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../redux/hook";
-import InputComponent from "@/components/common/InputComponent";
-import ButtonComponent from "@/components/pages/Login/ButtonComponents";
+import ButtonComponent from "@/components/pages/login/ButtonComponents";
+import InputComponent from "@/components/pages/login/InputComponents";
 
 const Register = () => {
   const usernameRef = useRef<HTMLInputElement>(null);
