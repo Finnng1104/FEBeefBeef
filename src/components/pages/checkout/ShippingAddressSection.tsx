@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import ModalSelectAddress, { Address } from './ModalSelectAddress';
+import ModalSelectAddress from './ModalSelectAddress';
+import { Address } from '@/types/Address.type';
 import { AddAddressModal } from '../address/AddAddressModal';
 import { toast } from 'react-toastify';
 import ModalSelectDeliveryTime, {
@@ -149,13 +150,17 @@ const ShippingAddressSection = ({
     deliveryMethod,
     onValidationRef,
   ]);
-
+  const getProvinceName = (code?: string) => {
+    if (!code) return '';
+    if (code === '79') return 'TP. Hồ Chí Minh';
+    return code;
+  };
   const getFormattedAddress = (address: Address) => {
     return [
       address.street_address,
       address.ward,
       address.district,
-      address.province,
+      address.province ? getProvinceName(address.province) : '',
     ]
       .filter(Boolean)
       .join(', ');
@@ -167,27 +172,24 @@ const ShippingAddressSection = ({
   };
 
   const handleSaveAddress = (
-    province: string,
-    district: string,
     ward: string,
+    province: string,
     street_address: string,
     full_name: string,
-    lat: number,
-    lon: number,
     phone: string,
     addressType: string,
   ) => {
     onAdd({
-      address_type: addressType,
+      address_type: addressType as 'HOME' | 'WORK' | 'OTHER',
       full_name,
       phone,
       province,
-      district,
+      district: '',
       ward,
       street_address,
-      lat,
-      lon,
       is_default: addresses.length === 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
     setIsAddModalOpen(false);
     toast.success('Đã thêm địa chỉ thành công');

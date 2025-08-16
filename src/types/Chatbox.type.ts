@@ -24,6 +24,8 @@ export interface ChatMessage {
   is_bot_reply?: boolean;
   message_type: 'text' | 'image' | 'file';
   reactions?: { emoji: string; userId?: string }[];
+  image?: string[];
+  
 }
 
 export interface SendMessagePayload {
@@ -37,6 +39,7 @@ export interface SendMessageAPIRequest {
   replyTo?: string;
   senderId?: string; 
   role?: 'user' | 'cashier'; 
+  attachments?: string[];
 }
 
 export interface GetMessagesResponse {

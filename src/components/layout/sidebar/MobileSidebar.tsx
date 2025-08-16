@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import ButtonComponents from '../../common/ButtonComponents';
 import NavExtend from './NavExtend';
 import { BsPersonCheck } from 'react-icons/bs';
-import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
 import { useGetCart } from '@/hooks/useCart';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,9 +15,6 @@ interface MobileSidebarProps {
   isOpen: boolean;
 }
 
-const userInfo = Cookies.get('userInfo');
-const user = userInfo ? JSON.parse(userInfo) : null;
-
 const MobileSidebar: React.FC<MobileSidebarProps> = ({
   toggleSidebar,
   isOpen,
@@ -28,9 +24,9 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
     navigate(path);
     toggleSidebar();
   };
-
   const { data: cart } = useGetCart();
   const countCart = cart?.items?.length || 0;
+  const user = useSelector((state: RootState) => state.auth.userInfo);
   const favoriteCount = useSelector(
     (state: RootState) => state.favorite.items.length,
   );
@@ -49,11 +45,13 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
       >
         <div className="flex flex-col h-full relative">
           <div className="p-6">
-            <img
-              src="/assets/images/logo.png"
-              alt="Logo Beef Beef"
-              className="w-40 mx-auto"
-            />
+            <Link to="/">
+              <img
+                src="/assets/images/logo.png"
+                alt="Logo Beef Beef"
+                className="w-40 mx-auto"
+              />
+            </Link>
             <h1 className="text-center text-xl font-restora">Beef Beef</h1>
             <p className="text-center text-xs text-gray-400 font-restora">
               Restaurant & Bar

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import InputComponent from "../components/pages/login/InputComponents";
-import ButtonComponent from "../components/pages/login/ButtonComponents";
+import InputComponent from "../components/pages/Login/InputComponents";
+import ButtonComponent from "../components/pages/Login/ButtonComponents";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SlActionUndo } from "react-icons/sl";
 import { toast } from "react-toastify";
@@ -17,7 +17,7 @@ const EnterOTP = () => {
   const navigate = useNavigate();
   const email = location.state?.email || "";
 
-  const [countdown, setCountdown] = useState(60); // ⏳ 60 giây đếm ngược
+  const [countdown, setCountdown] = useState(180); // ⏳ 3 phút đếm ngược
   const [resendLoading, setResendLoading] = useState(false);
 
   const {
@@ -73,7 +73,7 @@ const EnterOTP = () => {
       setResendLoading(true);
       await authApi.sendOtpVerifyEmail(email);
       toast.success("Đã gửi lại mã OTP!");
-      setCountdown(60); // Reset lại 60 giây
+      setCountdown(180); // Reset lại 3 phút
     } catch {
       toast.error("Gửi lại OTP thất bại!");
     } finally {
@@ -135,7 +135,7 @@ const EnterOTP = () => {
           <p className="text-gray-300">
             {countdown > 0 ? (
               <>
-                Mã OTP sẽ hết hạn sau: <strong>{countdown}s</strong>
+                Mã OTP sẽ hết hạn sau: <strong>{Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}</strong>
               </>
             ) : (
               <span className="text-red-400">Mã OTP đã hết hạn.</span>

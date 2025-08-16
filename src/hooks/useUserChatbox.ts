@@ -19,14 +19,14 @@ export const useChatbox = () => {
       try {
         console.log('🔄 Đang khởi tạo chat session...');
         console.log('🔍 API Base URL:', 'https://api-beefbeef-restaurant.onrender.com/api');
-        
+
         // Kiểm tra token trước khi gọi API
         const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
         console.log('🔑 Token exists:', !!token);
-        
+
         const chat = await getChatSession();
         console.log('✅ Chat session created:', chat);
-        
+
         setChatId(chat._id);
         setUserId(chat.user_id);
 
@@ -42,22 +42,23 @@ export const useChatbox = () => {
         const fetchedMessages = await getMessages(chat._id);
         console.log('✅ Messages loaded:', fetchedMessages.length);
         setMessages(fetchedMessages);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('❌ Lỗi khởi tạo chat:', error);
+        const err = error as { response?: { status?: number; statusText?: string }; message?: string; config?: { url?: string; method?: string }; code?: string };
         console.error('❌ Error details:', {
-          status: error?.response?.status,
-          statusText: error?.response?.statusText,
-          message: error?.message,
-          url: error?.config?.url,
-          method: error?.config?.method,
+          status: err?.response?.status,
+          statusText: err?.response?.statusText,
+          message: err?.message,
+          url: err?.config?.url,
+          method: err?.config?.method,
         });
-        
+
         // Kiểm tra các lỗi phổ biến
-        if (error?.response?.status === 404) {
+        if (err?.response?.status === 404) {
           console.error('❌ API endpoint không tồn tại hoặc server chưa chạy');
-        } else if (error?.response?.status === 401) {
+        } else if (err?.response?.status === 401) {
           console.error('❌ Token không hợp lệ hoặc hết hạn');
-        } else if (error?.code === 'NETWORK_ERROR') {
+        } else if (err?.code === 'NETWORK_ERROR') {
           console.error('❌ Không thể kết nối đến server');
         }
       } finally {
@@ -79,7 +80,7 @@ export const useChatbox = () => {
     socket.on('typing', ({ userId, typing }) => {
       setTypingUserId(typing ? userId : null);
     });
-    
+
     socket.on('messageReactionUpdated', ({ messageId, reactions }) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -87,25 +88,32 @@ export const useChatbox = () => {
         )
       );
     });
-    
+
     return () => {
       socket.off('message');
       socket.off('typing');
-      socket.off('messageReactionUpdated'); 
+      socket.off('messageReactionUpdated');
     };
   }, []);
 
-  const handleSend = async (content: string, replyTo?: string) => {
-    if (!chatId || !content.trim() || isSending.current) return;
+  // attachments: image, audio
+  const handleSend = async (content: string, replyTo?: string, attachments?: string[], audio?: string[]) => {
+    if (!chatId || (!content.trim() && (!attachments || attachments.length === 0) && (!audio || audio.length === 0)) || isSending.current) return;
 
     isSending.current = true;
     try {
-      await sendMessage({
+      const sentMsg = await sendMessage({
         chatId,
         content,
         replyTo,
         senderId: userId ?? undefined,
         role: 'user',
+        image: attachments,
+        audio: audio,
+      });
+      setMessages((prev) => {
+        const exists = prev.some((m) => m._id === sentMsg._id);
+        return exists ? prev : [...prev, sentMsg];
       });
     } catch (error) {
       console.error('Send message failed:', error);

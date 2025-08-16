@@ -1,40 +1,40 @@
-import React, { useState, useEffect, useRef } from "react";
-import InputComponent from "../components/pages/login/InputComponents";
-import ButtonComponent from "../components/pages/login/ButtonComponents";
-import CheckboxComponent from "../components/common/CheckboxComponents";
-import { Link, useNavigate } from "react-router-dom";
-import { SlActionUndo } from "react-icons/sl";
-import { useAppDispatch, useAppSelector } from "../redux/hook";
-import { LoginUser } from "../redux/feature/auth/authActions";
-import { toast } from "react-toastify";
-import { clearStatus } from "../redux/feature/auth/authSlice";
-import { AxiosError } from "axios";
-import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { LoginWithGoogle } from "../redux/feature/auth/authActions";
-import Cookies from "js-cookie";
-import { fetchCurrentUser } from "@/redux/feature/user/userAction";
+import React, { useState, useEffect, useRef } from 'react';
+import InputComponent from '../components/pages/Login/InputComponents';
+import ButtonComponent from '../components/pages/Login/ButtonComponents';
+
+import CheckboxComponent from '../components/common/CheckboxComponents';
+import { Link, useNavigate } from 'react-router-dom';
+import { SlActionUndo } from 'react-icons/sl';
+import { useAppDispatch, useAppSelector } from '../redux/hook';
+import { LoginUser } from '../redux/feature/auth/authActions';
+import { toast } from 'react-toastify';
+import { clearStatus } from '../redux/feature/auth/authSlice';
+import { AxiosError } from 'axios';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { LoginWithGoogle } from '../redux/feature/auth/authActions';
+import Cookies from 'js-cookie';
+import { fetchCurrentUser } from '@/redux/feature/user/userAction';
 
 const Login = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [formError, setFormError] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { error, success } = useAppSelector((state) => state.auth);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
 
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem("email") || "";
-    const savedPassword = localStorage.getItem("password") || "";
+    const savedEmail = localStorage.getItem('email') || '';
+    const savedPassword = localStorage.getItem('password') || '';
     if (savedEmail && savedPassword) {
       setFormData({ email: savedEmail, password: savedPassword });
       setRememberMe(true);
@@ -42,12 +42,24 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
+    if (error) {
+      if (error.includes('Email của bạn chưa được xác minh')) {
+        setTimeout(() => {
+          navigate('/verify-otp-email', { state: { email: formData.email } });
+        }, 5000);
+      }
+  
+      dispatch(clearStatus({}));
+    }
+  }, [error, navigate, dispatch, formData.email]);
+  
+  useEffect(() => {
     if (success) {
-      navigate("/");
+      navigate('/');
     }
     if (error) {
       toast.error(error);
-      dispatch(clearStatus(""));
+      dispatch(clearStatus(''));
     }
   }, [success, error, navigate, dispatch]);
 
@@ -57,7 +69,7 @@ const Login = () => {
       ...prevData,
       [name]: value,
     }));
-    setFormError("");
+    setFormError('');
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,40 +89,40 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-
+  
     const { email, password } = formData;
     let newErrors: { email?: string; password?: string } = {};
-
+  
     if (!isEmailValid(email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = 'Email không hợp lệ';
     }
-
+  
     if (!isPasswordValid(password)) {
       newErrors.password =
-        "Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số";
+        'Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số';
     }
-
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
+  
     setErrors({});
     setIsSubmitting(true);
-
+  
     try {
       await dispatch(LoginUser({ email, password, rememberMe }))
         .unwrap()
         .then((result) => {
           if (rememberMe) {
-            localStorage.setItem("email", email);
+            localStorage.setItem('email', email);
           } else {
-            localStorage.removeItem("email");
+            localStorage.removeItem('email');
           }
-
+  
           const userId = result.user._id;
           dispatch(fetchCurrentUser({ userId }));
-          navigate("/");
+          navigate('/');
         });
     } catch (error) {
       if (error instanceof AxiosError && error?.response?.data?.message) {
@@ -123,9 +135,9 @@ const Login = () => {
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    nextRef?: React.RefObject<HTMLInputElement> | null
+    nextRef?: React.RefObject<HTMLInputElement> | null,
   ) => {
-    if (e.key === "Enter" && nextRef?.current) {
+    if (e.key === 'Enter' && nextRef?.current) {
       e.preventDefault();
       nextRef.current.focus();
     }
@@ -134,25 +146,25 @@ const Login = () => {
   const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
     try {
       if (!response.credential) {
-        toast.error("Google credential không tồn tại");
+        toast.error('Google credential không tồn tại');
         return;
       }
       const result = await dispatch(
-        LoginWithGoogle({ credential: response.credential, rememberMe })
+        LoginWithGoogle({ credential: response.credential, rememberMe }),
       ).unwrap();
 
-      Cookies.set("userInfo", JSON.stringify(result.user), { expires: 1 });
+      Cookies.set('userInfo', JSON.stringify(result.user), { expires: 1 });
 
-      // ✅ Gọi fetchCurrentUser
-      dispatch(fetchCurrentUser({ userId: result.user._id })); // ← THÊM DÒNG NÀY
+    
+      dispatch(fetchCurrentUser({ userId: result.user._id }));
 
-      toast.success("Đăng nhập Google thành công!");
-      navigate("/");
+      toast.success('Đăng nhập Google thành công!');
+      navigate('/');
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error(error.message || "Lỗi đăng nhập Google");
+        toast.error(error.message || 'Lỗi đăng nhập Google');
       } else {
-        toast.error("Lỗi đăng nhập Google");
+        toast.error('Lỗi đăng nhập Google');
       }
     }
   };
@@ -172,9 +184,7 @@ const Login = () => {
             onKeyDown={(e) => handleKeyDown(e, passwordRef)}
           />
           {errors.email && (
-            <div className="text-red-500 text-sm text-left mt-1">
-              {errors.email}
-            </div>
+            <div className="text-red-500 text-sm text-left mt-1">{errors.email}</div>
           )}
           <InputComponent
             type="password"
@@ -186,9 +196,7 @@ const Login = () => {
             onKeyDown={(e) => handleKeyDown(e, null)}
           />
           {errors.password && (
-            <div className="text-red-500 text-sm text-left mt-1">
-              {errors.password}
-            </div>
+            <div className="text-red-500 text-sm text-left mt-1">{errors.password}</div>
           )}
 
           <div className="flex justify-between items-center mt-4 mb-3">
@@ -199,7 +207,7 @@ const Login = () => {
             />
             <button
               type="button"
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => navigate('/forgot-password')}
               className="text-sm text-white hover:text-secondaryColor hover:underline"
             >
               Quên mật khẩu?
@@ -209,7 +217,7 @@ const Login = () => {
           <ButtonComponent
             htmlType="submit"
             text="Đăng nhập"
-            disabled={isSubmitting}
+            disabled={isSubmitting }
           />
         </form>
 
@@ -224,13 +232,13 @@ const Login = () => {
         <div className="flex justify-center gap-8 mt-4">
           <GoogleLogin
             onSuccess={handleGoogleLoginSuccess}
-            onError={() => toast.error("Đăng nhập Google thất bại")}
+            onError={() => toast.error('Đăng nhập Google thất bại')}
           />
         </div>
 
         <div className="mt-6 text-sm text-white">
           <p>
-            Bạn chưa có tài khoản?{" "}
+            Bạn chưa có tài khoản?{' '}
             <Link
               to="/register"
               className="text-white underline hover:text-secondaryColor"
