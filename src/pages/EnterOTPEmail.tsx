@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import InputComponent from "../components/pages/Login/InputComponents";
-import ButtonComponent from "../components/pages/Login/ButtonComponents";
+import InputComponent from "../components/pages/login/InputComponents";
+import ButtonComponent from "../components/pages/login/ButtonComponents";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SlActionUndo } from "react-icons/sl";
 import { toast } from "react-toastify";
@@ -135,7 +135,11 @@ const EnterOTP = () => {
           <p className="text-gray-300">
             {countdown > 0 ? (
               <>
-                Mã OTP sẽ hết hạn sau: <strong>{Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}</strong>
+                Mã OTP sẽ hết hạn sau:{" "}
+                <strong>
+                  {Math.floor(countdown / 60)}:
+                  {String(countdown % 60).padStart(2, "0")}
+                </strong>
               </>
             ) : (
               <span className="text-red-400">Mã OTP đã hết hạn.</span>

@@ -11,7 +11,6 @@ const ButtonComponent: React.FC<Props> = ({
   htmlType = "button",
   text = "Đăng Ký",
   onClick,
-
   disabled = false,
 }) => {
   return (
