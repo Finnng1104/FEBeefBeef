@@ -1,21 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { FiCornerDownLeft, FiMoreVertical, FiSend, FiArrowLeft, FiUser } from 'react-icons/fi';
-import { FaRobot } from 'react-icons/fa';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { socket } from '@/utils/socket';
-import { deleteMessage } from '@/api/ChatboxApi';
-import { EmojiButton } from '@joeattardi/emoji-button';
+import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import {
+  FiCornerDownLeft,
+  FiMoreVertical,
+  FiSend,
+  FiArrowLeft,
+  FiUser,
+} from "react-icons/fi";
+import { FaRobot } from "react-icons/fa";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { socket } from "@/utils/socket";
+import { deleteMessage } from "@/api/ChatboxApi";
+import { EmojiButton } from "@joeattardi/emoji-button";
 
 type UnifiedMessage = {
-  sender_id?: 'user' | 'bot' | string;
+  sender_id?: "user" | "bot" | string;
   text?: string;
   sender_role?: string;
   content?: string;
   sent_at?: string | number;
   reactions?: { emoji: string; userId?: string }[];
-  message_type?: 'text' | 'image' | 'file' | 'audio';
+  message_type?: "text" | "image" | "file" | "audio";
   image?: string[];
   audio?: string[];
   _id?: string;
@@ -27,7 +33,11 @@ interface ChatWindowProps {
   messages: UnifiedMessage[];
   input: string;
   onInputChange: (value: string) => void;
-  onSend: (replyToId?: string, attachments?: string[], audio?: string[]) => void;
+  onSend: (
+    replyToId?: string,
+    attachments?: string[],
+    audio?: string[]
+  ) => void;
   onClose: () => void;
   showInput: boolean;
   onShowInput: () => void;
@@ -37,7 +47,6 @@ interface ChatWindowProps {
   chatId?: string;
   faqs: { question: string; answer: string }[];
   onInputKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-
 }
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -55,15 +64,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [reactionPickerIdx, setReactionPickerIdx] = useState<number | null>(null);
+  const [reactionPickerIdx, setReactionPickerIdx] = useState<number | null>(
+    null
+  );
   const [reactionPickerLock, setReactionPickerLock] = useState(false);
-  const [reactionFullPickerIdx, setReactionFullPickerIdx] = useState<number | null>(null);
+  const [reactionFullPickerIdx, setReactionFullPickerIdx] = useState<
+    number | null
+  >(null);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const hideActionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const actionHideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reactionPickerRef = useRef<HTMLDivElement | null>(null);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
-  const popularEmojis = ['❤️', '👍'];
+  const popularEmojis = ["❤️", "👍"];
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const emojiButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -71,10 +84,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const currentMsgIdRef = useRef<string | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [loadingFaq, setLoadingFaq] = useState<number | null>(null);
-  const [typingText, setTypingText] = useState<string>('');
+  const [typingText, setTypingText] = useState<string>("");
   const typingInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [faqAnswers, setFaqAnswers] = useState<{ [key: number]: string }>({});
-  const [replyTarget, setReplyTarget] = useState<{ id: string; preview: string } | null>(null);
+  const [replyTarget, setReplyTarget] = useState<{
+    id: string;
+    preview: string;
+  } | null>(null);
   const [moreMenuIdx, setMoreMenuIdx] = useState<number | null>(null);
   const [hiddenForMe, setHiddenForMe] = useState<Set<string>>(new Set());
   const [recording, setRecording] = useState(false);
@@ -83,11 +99,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [pendingAudioMsg, setPendingAudioMsg] = useState<string | null>(null);
 
-  const aggregateReactions = (reactions?: { emoji: string; userId?: string }[]) => {
-    if (!reactions || reactions.length === 0) return { items: [] as { emoji: string; count: number }[], total: 0 };
+  const aggregateReactions = (
+    reactions?: { emoji: string; userId?: string }[]
+  ) => {
+    if (!reactions || reactions.length === 0)
+      return { items: [] as { emoji: string; count: number }[], total: 0 };
     const counts = new Map<string, number>();
-    reactions.forEach((r) => counts.set(r.emoji, (counts.get(r.emoji) || 0) + 1));
-    const order = ['❤️', '👍'];
+    reactions.forEach((r) =>
+      counts.set(r.emoji, (counts.get(r.emoji) || 0) + 1)
+    );
+    const order = ["❤️", "👍"];
     const items = Array.from(counts.entries())
       .map(([emoji, count]) => ({ emoji, count }))
       .sort((a, b) => order.indexOf(a.emoji) - order.indexOf(b.emoji));
@@ -97,11 +118,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const formatTime = (value?: string | number) => {
     try {
-      if (!value) return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const d = typeof value === 'number' ? new Date(value) : new Date(value);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (!value)
+        return new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      const d = typeof value === "number" ? new Date(value) : new Date(value);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     } catch {
-      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
   };
 
@@ -123,19 +151,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       }
     }
     if (reactionPickerLock) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
       if (hideActionTimeout.current) clearTimeout(hideActionTimeout.current);
     };
   }, [reactionPickerLock]);
 
   // Load/Save locally hidden messages per chat
   useEffect(() => {
-    const key = chatId ? `chat_hidden_${chatId}` : '';
+    const key = chatId ? `chat_hidden_${chatId}` : "";
     if (!key) return;
     try {
       const raw = localStorage.getItem(key);
@@ -162,7 +190,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // Tự cuộn xuống khi có tin nhắn mới hoặc đổi chế độ
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, showInput]);
 
   const handleSendClick = () => {
@@ -172,7 +200,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
-        onInputChange('');
+        onInputChange("");
         onSend(replyTarget?.id, [dataUrl]); // image
         setReplyTarget(null);
       };
@@ -195,7 +223,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const handleReactToMessage = (messageId: string, emoji: string) => {
     if (!currentUserId) return;
-    socket.emit('reactMessage', {
+    socket.emit("reactMessage", {
       messageId,
       emoji,
       userId: currentUserId,
@@ -209,16 +237,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       await navigator.clipboard.writeText(text);
       // optional: toast here if needed
     } catch (e) {
-      console.error('Không thể sao chép', e);
+      console.error("Không thể sao chép", e);
     }
   };
 
   const handleDownloadImage = (url: string) => {
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'image.jpg';
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
+    a.download = "image.jpg";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -238,7 +266,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const handleFaqClick = (idx: number) => {
     setExpandedFaq(null);
     setLoadingFaq(idx);
-    setTypingText('');
+    setTypingText("");
     if (typingInterval.current) clearInterval(typingInterval.current);
     setTimeout(() => {
       setExpandedFaq(idx);
@@ -251,12 +279,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       const matched = faqs.find(
         (f) =>
           f.question.trim().toLowerCase() ===
-          faqList[expandedFaq].trim().toLowerCase(),
+          faqList[expandedFaq].trim().toLowerCase()
       );
       const answer =
-        matched?.answer || 'Xin lỗi, tôi chưa có câu trả lời phù hợp.';
+        matched?.answer || "Xin lỗi, tôi chưa có câu trả lời phù hợp.";
       let i = 0;
-      setTypingText('');
+      setTypingText("");
       if (typingInterval.current) clearInterval(typingInterval.current);
       typingInterval.current = setInterval(() => {
         setTypingText((prev) => {
@@ -274,12 +302,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       };
     }
   }, [expandedFaq, loadingFaq, faqs, faqList]);
-  function handleStartRecording(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
+  function handleStartRecording(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Trình duyệt không hỗ trợ ghi âm.');
+      alert("Trình duyệt không hỗ trợ ghi âm.");
       return;
     }
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
       .then((stream) => {
         const mediaRecorder = new window.MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
@@ -289,7 +320,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           audioChunks.push(e.data);
         };
         mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
           setAudioBlob(audioBlob);
           setAudioUrl(URL.createObjectURL(audioBlob));
           setRecording(false);
@@ -297,11 +328,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         mediaRecorder.start();
       })
       .catch(() => {
-        alert('Không thể truy cập micro.');
+        alert("Không thể truy cập micro.");
       });
   }
 
-  function handleStopRecording(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
+  function handleStopRecording(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
       setRecording(false);
@@ -313,7 +346,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="bg-gradient-to-r from-[#1B263B] to-[#0D1B2A] px-4 py-3 flex items-center justify-between border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shadow-inner overflow-hidden">
-            <img src="/assets/images/logo3.png" alt="BeefBeef Logo" className="w-7 h-7 object-contain" />
+            <img
+              src="/assets/images/logo3.png"
+              alt="BeefBeef Logo"
+              className="w-7 h-7 object-contain"
+            />
           </div>
           <div className="leading-tight">
             <p className="text-sm font-semibold">Hỗ trợ BeefBeef</p>
@@ -346,7 +383,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           {faqList.map((faq, idx) => {
             const matched = faqs.find(
               (f) =>
-                f.question.trim().toLowerCase() === faq.trim().toLowerCase(),
+                f.question.trim().toLowerCase() === faq.trim().toLowerCase()
             );
             return (
               <div key={idx}>
@@ -360,7 +397,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 {loadingFaq === idx && (
                   <div className="flex items-start mt-1">
                     {/* Avatar bot */}
-                    <span className="text-2xl mr-3">                    <FaRobot className="text-yellow-300" size={16} />
+                    <span className="text-2xl mr-3">
+                      {" "}
+                      <FaRobot className="text-yellow-300" size={16} />
                     </span>
                     {/* Bubble loading */}
                     <div className="relative group max-w-[75%]">
@@ -391,7 +430,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             onClick={onShowInput}
             className="mt-4 text-sm underline hover:text-yellow-300 flex items-center gap-2"
           >
-            <span>                      <FaRobot className="text-yellow-300" size={16} />
+            <span>
+              {" "}
+              <FaRobot className="text-yellow-300" size={16} />
             </span>
             <span>Trợ lý bằng AI</span>
           </button>
@@ -400,25 +441,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <>
           <div className="flex-1 relative overflow-y-auto px-4 py-3 space-y-3 text-sm hide-scrollbar scrollbar-thin scrollbar-thumb-yellow-400/80 scrollbar-track-transparent scrollbar-thumb-rounded-full hover:scrollbar-thumb-yellow-500 overflow-x-visible">
             {messages.map((msg, idx) => {
-              const text = msg.text || msg.content || '';
-              const senderId = msg.sender_id || '';
-              const isMine = senderId === currentUserId || senderId === 'user';
-              const messageType = msg.message_type || 'text';
-              const attachments = messageType === 'image'
-                ? (msg.image || msg.image || [])
-                : (msg.image || []);
+              const text = msg.text || msg.content || "";
+              const senderId = msg.sender_id || "";
+              const isMine = senderId === currentUserId || senderId === "user";
+              const messageType = msg.message_type || "text";
+              const attachments =
+                messageType === "image"
+                  ? msg.image || msg.image || []
+                  : msg.image || [];
               const replyPreview: string | undefined = (() => {
-                const reply = (msg as unknown as { reply_to?: { _id?: string; id?: string; content?: string; text?: string } }).reply_to;
+                const reply = (
+                  msg as unknown as {
+                    reply_to?: {
+                      _id?: string;
+                      id?: string;
+                      content?: string;
+                      text?: string;
+                    };
+                  }
+                ).reply_to;
                 if (!reply) return undefined;
                 const inline = reply.content || reply.text;
                 if (inline && inline.trim().length > 0) return inline;
                 const replyId = reply._id || reply.id;
                 if (!replyId) return undefined;
-                const found = (messages as unknown as Array<{ _id?: string; text?: string; content?: string; message_type?: string }>).find(
-                  (m) => m._id === replyId,
-                );
+                const found = (
+                  messages as unknown as Array<{
+                    _id?: string;
+                    text?: string;
+                    content?: string;
+                    message_type?: string;
+                  }>
+                ).find((m) => m._id === replyId);
                 if (!found) return undefined;
-                if (found.message_type === 'image') return '[image]';
+                if (found.message_type === "image") return "[image]";
                 return found.text || found.content;
               })();
 
@@ -428,7 +484,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               return (
                 <div
                   key={idx}
-                  className={`flex items-start ${isMine ? 'justify-end' : 'justify-start'}`}
+                  className={`flex items-start ${isMine ? "justify-end" : "justify-start"}`}
                 >
                   {/* Avatar trái */}
                   {!isMine && (
@@ -470,99 +526,153 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   >
                     <div
                       className={`
-                        inline-block min-w-[80px] ${isMine ? 'px-3 py-2' : 'px-2.5 py-2'} rounded-2xl shadow
+                        inline-block min-w-[80px] ${isMine ? "px-3 py-2" : "px-2.5 py-2"} rounded-2xl shadow
                         whitespace-pre-wrap break-words
-                        ${isMine ? 'bg-gradient-to-br from-yellow-300 to-amber-200 text-black border border-amber-300/40' : 'bg-white text-black text-xs border border-black/5'}
-                        ${!isMine ? 'max-h-[320px] overflow-y-auto' : ''}
+                        ${isMine ? "bg-gradient-to-br from-yellow-300 to-amber-200 text-black border border-amber-300/40" : "bg-white text-black text-xs border border-black/5"}
+                        ${!isMine ? "max-h-[320px] overflow-y-auto" : ""}
                       `}
                     >
                       {/* Reply preview inside bubble */}
                       {msg.reply_to && (
-                        <div className={`${isMine ? 'bg-amber-100/70 border-amber-300/70' : 'bg-gray-100/80 border-gray-300/70'} text-[11px] rounded-lg mb-2 px-2 py-1 border-l-4 ${isMine ? 'border-l-yellow-400' : 'border-l-gray-400'}`}>
+                        <div
+                          className={`${isMine ? "bg-amber-100/70 border-amber-300/70" : "bg-gray-100/80 border-gray-300/70"} text-[11px] rounded-lg mb-2 px-2 py-1 border-l-4 ${isMine ? "border-l-yellow-400" : "border-l-gray-400"}`}
+                        >
                           <span className="opacity-70 mr-1">Trả lời:</span>
-                          <span className="line-clamp-2 break-words">{replyPreview || 'Tin nhắn'}</span>
+                          <span className="line-clamp-2 break-words">
+                            {replyPreview || "Tin nhắn"}
+                          </span>
                         </div>
                       )}
                       {/* Nội dung text */}
-                      {(!isMine && messageType === 'text') ? (
+                      {!isMine && messageType === "text" ? (
                         <ReactMarkdown
                           components={{
-                            a: (props) => <a {...props} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer" />,
-                            strong: (props) => <strong className="font-bold text-yellow-700" {...props} />,
-                            del: (props) => <span className="line-through text-gray-500" {...props} />,
+                            a: (props) => (
+                              <a
+                                {...props}
+                                className="text-blue-600 underline break-all"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              />
+                            ),
+                            strong: (props) => (
+                              <strong
+                                className="font-bold text-yellow-700"
+                                {...props}
+                              />
+                            ),
+                            del: (props) => (
+                              <span
+                                className="line-through text-gray-500"
+                                {...props}
+                              />
+                            ),
                             p: (props) => <p className="mb-2" {...props} />,
-                            ul: (props) => <ul className="list-disc ml-4" {...props} />,
+                            ul: (props) => (
+                              <ul className="list-disc ml-4" {...props} />
+                            ),
                             li: (props) => <li className="mb-1" {...props} />,
                           }}
-                        >{text}</ReactMarkdown>
+                        >
+                          {text}
+                        </ReactMarkdown>
                       ) : (
                         <p>{text}</p>
                       )}
 
                       {/* Hiển thị hình ảnh nếu có */}
-                      {messageType === 'image' && attachments.length > 0 && (
+                      {messageType === "image" && attachments.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          {attachments.map((imageUrl: string, imgIdx: number) => (
-                            <div key={imgIdx} className="relative">
-                              <img
-                                src={imageUrl}
-                                alt={`Hình ảnh ${imgIdx + 1}`}
-                                className="w-[120px] h-auto rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => window.open(imageUrl, '_blank')}
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                }}
-                              />
-                              <div className="text-xs text-gray-500 mt-1">
-                                📸 Click để xem ảnh gốc
+                          {attachments.map(
+                            (imageUrl: string, imgIdx: number) => (
+                              <div key={imgIdx} className="relative">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Hình ảnh ${imgIdx + 1}`}
+                                  className="w-[120px] h-auto rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() =>
+                                    window.open(imageUrl, "_blank")
+                                  }
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = "none";
+                                  }}
+                                />
+                                <div className="text-xs text-gray-500 mt-1">
+                                  📸 Click để xem ảnh gốc
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
                       )}
 
                       {/* Hiển thị audio nếu có */}
-                      {messageType === 'audio' && msg.audio && msg.audio.length > 0 && (
-                        <div>
-                          {msg.audio.map((audioUrl: string, audioIdx: number) => (
-                            <audio key={audioIdx} controls src={audioUrl} />
-                          ))}
-                        </div>
-                      )}
+                      {messageType === "audio" &&
+                        msg.audio &&
+                        msg.audio.length > 0 && (
+                          <div>
+                            {msg.audio.map(
+                              (audioUrl: string, audioIdx: number) => (
+                                <audio key={audioIdx} controls src={audioUrl} />
+                              )
+                            )}
+                          </div>
+                        )}
 
                       {/* Thời gian */}
-                      <p className="text-[11px] text-gray-500 mt-1 text-right">{formatTime(msg.sent_at)}</p>
+                      <p className="text-[11px] text-gray-500 mt-1 text-right">
+                        {formatTime(msg.sent_at)}
+                      </p>
                     </div>
 
                     {/* ✅ Reactions hiển thị gọn như Messenger */}
-                    {msg.reactions && msg.reactions.length > 0 && (() => {
-                      const { items, total } = aggregateReactions(msg.reactions);
-                      return (
-                        <div
-                          className={`absolute text-[13px] font-medium ${isMine ? 'bottom-[-14px] left-[-6px]' : 'bottom-[-14px] right-[-6px]'
+                    {msg.reactions &&
+                      msg.reactions.length > 0 &&
+                      (() => {
+                        const { items, total } = aggregateReactions(
+                          msg.reactions
+                        );
+                        return (
+                          <div
+                            className={`absolute text-[13px] font-medium ${
+                              isMine
+                                ? "bottom-[-14px] left-[-6px]"
+                                : "bottom-[-14px] right-[-6px]"
                             } bg-white rounded-full border border-gray-200 shadow px-1.5 py-[2px] flex items-center gap-1`}
-                        >
-                          {items.map(({ emoji }, i) => (
-                            <span key={i} className="leading-none">{emoji}</span>
-                          ))}
-                          <span className="text-xs text-gray-600 ml-0.5">{total}</span>
-                        </div>
-                      );
-                    })()}
+                          >
+                            {items.map(({ emoji }, i) => (
+                              <span key={i} className="leading-none">
+                                {emoji}
+                              </span>
+                            ))}
+                            <span className="text-xs text-gray-600 ml-0.5">
+                              {total}
+                            </span>
+                          </div>
+                        );
+                      })()}
 
                     {/* Hover actions */}
                     <div
                       className={`
                         absolute top-1/2 -translate-y-1/2 z-[50] gap-1
-                        ${isMine ? 'right-full mr-2' : 'left-full ml-2'}
-                        ${hoveredIdx === idx ? 'flex' : 'hidden group-hover:flex'}
+                        ${isMine ? "right-full mr-2" : "left-full ml-2"}
+                        ${hoveredIdx === idx ? "flex" : "hidden group-hover:flex"}
                       `}
                     >
                       <button
                         onClick={() => {
-                          const previewText = (msg.text || msg.content || '').slice(0, 120);
-                          if (msg._id) setReplyTarget({ id: msg._id, preview: previewText });
+                          const previewText = (
+                            msg.text ||
+                            msg.content ||
+                            ""
+                          ).slice(0, 120);
+                          if (msg._id)
+                            setReplyTarget({
+                              id: msg._id,
+                              preview: previewText,
+                            });
                         }}
                         className="action-btn w-8 h-8 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:scale-110 transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
                         style={{ zIndex: 60 }}
@@ -580,7 +690,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                           } else {
                             setReactionPickerIdx(idx);
                             setReactionPickerLock(true);
-                            currentMsgIdRef.current = msg._id || '';
+                            currentMsgIdRef.current = msg._id || "";
                           }
                           if (hideActionTimeout.current) {
                             clearTimeout(hideActionTimeout.current);
@@ -593,7 +703,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         😊
                       </button>
                       <button
-                        onClick={() => setMoreMenuIdx((prev) => (prev === idx ? null : idx))}
+                        onClick={() =>
+                          setMoreMenuIdx((prev) => (prev === idx ? null : idx))
+                        }
                         className="action-btn w-8 h-8 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:scale-110 transition"
                         title="More"
                       >
@@ -602,35 +714,43 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       {moreMenuIdx === idx && (
                         <div
                           ref={moreMenuRef}
-                          className={`absolute top-8 ${isMine ? 'right-0' : 'left-0'} z-[999] bg-white border border-gray-200 shadow-lg text-xs min-w-[150px] text-gray-800 `}
+                          className={`absolute top-8 ${isMine ? "right-0" : "left-0"} z-[999] bg-white border border-gray-200 shadow-lg text-xs min-w-[150px] text-gray-800 `}
                         >
                           <button
                             className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-800 normal-case"
                             onClick={() => {
                               setReplyTarget(null);
                               setMoreMenuIdx(null);
-                              const text = msg.text || msg.content || '';
+                              const text = msg.text || msg.content || "";
                               handleCopyMessage(text);
                             }}
                           >
                             Sao chép nội dung
                           </button>
-                          {messageType === 'image' && attachments.length > 0 && (
-                            <button
-                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-800 normal-case"
-                              onClick={() => {
-                                setMoreMenuIdx(null);
-                                handleDownloadImage(attachments[0]);
-                              }}
-                            >
-                              Tải ảnh xuống
-                            </button>
-                          )}
+                          {messageType === "image" &&
+                            attachments.length > 0 && (
+                              <button
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-800 normal-case"
+                                onClick={() => {
+                                  setMoreMenuIdx(null);
+                                  handleDownloadImage(attachments[0]);
+                                }}
+                              >
+                                Tải ảnh xuống
+                              </button>
+                            )}
                           {msg._id && (
                             <button
                               className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-800 normal-case"
                               onClick={() => {
-                                setReplyTarget({ id: msg._id as string, preview: (msg.text || msg.content || '').slice(0, 120) });
+                                setReplyTarget({
+                                  id: msg._id as string,
+                                  preview: (
+                                    msg.text ||
+                                    msg.content ||
+                                    ""
+                                  ).slice(0, 120),
+                                });
                                 setMoreMenuIdx(null);
                               }}
                             >
@@ -644,11 +764,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                 onClick={async () => {
                                   if (!chatId) return;
                                   try {
-                                    await deleteMessage(chatId, msg._id as string);
+                                    await deleteMessage(
+                                      chatId,
+                                      msg._id as string
+                                    );
                                     hideMessageForMe(msg._id as string);
                                     setMoreMenuIdx(null);
                                   } catch (e) {
-                                    console.error('Xoá tin nhắn thất bại', e);
+                                    console.error("Xoá tin nhắn thất bại", e);
                                   }
                                 }}
                               >
@@ -665,14 +788,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                               </button>
                             </>
                           )}
-                        
                         </div>
                       )}
                       {reactionPickerIdx === idx && reactionPickerLock && (
                         <div
                           ref={reactionPickerRef}
-                          className={`absolute -top-12 ${isMine ? 'right-0' : 'left-0'} z-[9999] bg-white rounded-full shadow-lg flex items-center gap-2 px-2.5 py-1.5 border border-gray-200`}
-                          style={{ pointerEvents: 'auto' }}
+                          className={`absolute -top-12 ${isMine ? "right-0" : "left-0"} z-[9999] bg-white rounded-full shadow-lg flex items-center gap-2 px-2.5 py-1.5 border border-gray-200`}
+                          style={{ pointerEvents: "auto" }}
                           onMouseEnter={() => {
                             // Hover vào dải emoji thì giữ lại, clear timeout
                             if (hideActionTimeout.current) {
@@ -694,7 +816,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                               className="text-xl hover:scale-110 transition focus:outline-none"
                               onClick={() => {
                                 if (currentMsgIdRef.current) {
-                                  handleReactToMessage(currentMsgIdRef.current, emoji);
+                                  handleReactToMessage(
+                                    currentMsgIdRef.current,
+                                    emoji
+                                  );
                                 }
                                 setReactionPickerLock(false);
                                 setReactionPickerIdx(null);
@@ -710,12 +835,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         </div>
                       )}
                       {reactionFullPickerIdx === idx && (
-                        <div className="absolute -top-40 left-1/2 -translate-x-1/2 z-[9999]" onMouseLeave={() => setReactionFullPickerIdx(null)}>
+                        <div
+                          className="absolute -top-40 left-1/2 -translate-x-1/2 z-[9999]"
+                          onMouseLeave={() => setReactionFullPickerIdx(null)}
+                        >
                           <EmojiPicker
                             theme={Theme.DARK}
                             onEmojiClick={(e) => {
                               if (currentMsgIdRef.current) {
-                                handleReactToMessage(currentMsgIdRef.current, e.emoji);
+                                handleReactToMessage(
+                                  currentMsgIdRef.current,
+                                  e.emoji
+                                );
                               }
                               setReactionFullPickerIdx(null);
                               setReactionPickerIdx(null);
@@ -751,13 +882,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     {replyTarget.preview}
                   </div>
                 </div>
-                <button className="text-white/60 hover:text-white" onClick={() => setReplyTarget(null)} title="Bỏ trả lời">✕</button>
+                <button
+                  className="text-white/60 hover:text-white"
+                  onClick={() => setReplyTarget(null)}
+                  title="Bỏ trả lời"
+                >
+                  ✕
+                </button>
               </div>
             )}
             {audioBlob && (
               <div className="flex items-center bg-white/10 border border-white/20 rounded-lg px-3 py-2 mb-2">
-                <audio controls src={audioUrl || undefined} className="w-full" />
-                <button className="ml-2 text-xs text-red-400" onClick={() => { setAudioBlob(null); setAudioUrl(null); }}>✕</button>
+                <audio
+                  controls
+                  src={audioUrl || undefined}
+                  className="w-full"
+                />
+                <button
+                  className="ml-2 text-xs text-red-400"
+                  onClick={() => {
+                    setAudioBlob(null);
+                    setAudioUrl(null);
+                  }}
+                >
+                  ✕
+                </button>
               </div>
             )}
             <div className="flex items-center gap-2 relative z-20">
@@ -771,7 +920,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 >
                   😊
                 </button>
-                <label className="cursor-pointer text-white/90 hover:text-yellow-300 text-lg rounded-lg px-2" style={{ zIndex: 30 }}>
+                <label
+                  className="cursor-pointer text-white/90 hover:text-yellow-300 text-lg rounded-lg px-2"
+                  style={{ zIndex: 30 }}
+                >
                   📷
                   <input
                     ref={fileInputRef}
@@ -823,7 +975,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-white/50 min-w-0"
                   placeholder="Nhập tin nhắn, emoji, đính kèm..."
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       handleSendClick();
                     }
                   }}
@@ -848,7 +1000,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {showEmojiPicker && (
-              <div className="absolute bottom-[94px] left-2 z-[9999] max-w-[300px]" style={{ pointerEvents: 'auto' }}>
+              <div
+                className="absolute bottom-[94px] left-2 z-[9999] max-w-[300px]"
+                style={{ pointerEvents: "auto" }}
+              >
                 <EmojiPicker
                   theme={Theme.DARK}
                   onEmojiClick={(e) => onInputChange(input + e.emoji)}
