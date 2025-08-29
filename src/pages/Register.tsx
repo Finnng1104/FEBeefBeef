@@ -1,14 +1,14 @@
-import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { SlActionUndo } from "react-icons/sl";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { RegisterUser } from "../redux/feature/auth/authActions";
-import { clearStatus } from "../redux/feature/auth/authSlice";
-import { useAppDispatch, useAppSelector } from "../redux/hook";
-import ButtonComponent from "../components/pages/login/ButtonComponents";
-import InputComponent from "../components/pages/login/InputComponents";
+import React, { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { SlActionUndo } from 'react-icons/sl';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { RegisterUser } from '../redux/feature/auth/authActions';
+import { clearStatus } from '../redux/feature/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '../redux/hook';
+import ButtonComponent from '../components/pages/login/ButtonComponents';
+import InputComponent from '../components/pages/login/InputComponents';
 const Register = () => {
   const usernameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -18,19 +18,19 @@ const Register = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { error, success } = useAppSelector((state) => state.auth);
   const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   useEffect(() => {
     usernameRef.current?.focus();
@@ -42,7 +42,7 @@ const Register = () => {
       /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     return (
-      username.trim() !== "" &&
+      username.trim() !== '' &&
       emailRegex.test(email) &&
       passwordRegex.test(password) &&
       password === confirmPassword
@@ -54,46 +54,46 @@ const Register = () => {
       ...prevData,
       [name]: value,
     }));
-    if (name === "username") {
+    if (name === 'username') {
       setErrors((prev) => ({
         ...prev,
         username:
           value.trim().length < 3
-            ? "Tên tài khoản phải có ít nhất 3 ký tự"
-            : "",
+            ? 'Tên tài khoản phải có ít nhất 3 ký tự'
+            : '',
       }));
     }
-    if (name === "email") {
+    if (name === 'email') {
       const emailRegex =
         /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/;
       setErrors((prev) => ({
         ...prev,
-        email: emailRegex.test(value) ? "" : "Email không hợp lệ",
+        email: emailRegex.test(value) ? '' : 'Email không hợp lệ',
       }));
     }
 
-    if (name === "password") {
+    if (name === 'password') {
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
       setErrors((prev) => ({
         ...prev,
         password: passwordRegex.test(value)
-          ? ""
-          : "Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số",
+          ? ''
+          : 'Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số',
       }));
     }
 
-    if (name === "confirmPassword") {
+    if (name === 'confirmPassword') {
       setErrors((prev) => ({
         ...prev,
         confirmPassword:
-          value === formData.password ? "" : "Mật khẩu xác nhận không khớp",
+          value === formData.password ? '' : 'Mật khẩu xác nhận không khớp',
       }));
     }
   };
   useEffect(() => {
     if (success) {
-      toast.success("Đăng ký thành công! Vui lòng xác minh email của bạn.");
-      navigate("/verify-otp-email", { state: { email: formData.email } });
+      toast.success('Đăng ký thành công! Vui lòng xác minh email của bạn.');
+      navigate('/verify-otp-email', { state: { email: formData.email } });
       dispatch(clearStatus({}));
     }
     if (error) {
@@ -107,27 +107,27 @@ const Register = () => {
     const { username, email, password, confirmPassword } = formData;
 
     if (!username || !email || !password || !confirmPassword) {
-      toast.error("Vui lòng điền đầy đủ thông tin");
+      toast.error('Vui lòng điền đầy đủ thông tin');
       return;
     }
     if (username.trim().length < 3) {
-      toast.error("Tên tài khoản phải có ít nhất 3 ký tự");
+      toast.error('Tên tài khoản phải có ít nhất 3 ký tự');
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error("Email không hợp lệ");
+      toast.error('Email không hợp lệ');
       return;
     }
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(password)) {
       toast.error(
-        "Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số"
+        'Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số',
       );
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Mật khẩu và xác nhận không khớp");
+      toast.error('Mật khẩu và xác nhận không khớp');
       return;
     }
     setIsSubmitting(true);
@@ -135,17 +135,17 @@ const Register = () => {
       .unwrap()
       .then(() => {
         setFormData({
-          username: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
         });
       })
       .catch((error) => {
         const errorMessage =
-          typeof error === "string"
+          typeof error === 'string'
             ? error
-            : error?.message || error?.data?.message || "Đăng ký thất bại";
+            : error?.message || error?.data?.message || 'Đăng ký thất bại';
 
         if (!hasErrorToast) {
           toast.error(errorMessage);
@@ -161,9 +161,9 @@ const Register = () => {
   };
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    nextRef?: React.RefObject<HTMLInputElement>
+    nextRef?: React.RefObject<HTMLInputElement>,
   ) => {
-    if (e.key === "Enter" && nextRef?.current) {
+    if (e.key === 'Enter' && nextRef?.current) {
       e.preventDefault();
       nextRef.current.focus();
     }
@@ -241,7 +241,7 @@ const Register = () => {
 
         <div className="mt-6 text-sm text-white">
           <p>
-            Bạn đã có tài khoản?{" "}
+            Bạn đã có tài khoản?{' '}
             <Link
               to="/login"
               className="text-white underline hover:text-secondaryColor"

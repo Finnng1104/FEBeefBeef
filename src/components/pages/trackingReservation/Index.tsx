@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import InputComponent from "../login/InputComponents";
-import ButtonComponent from "../login/ButtonComponents";
-import { getReservationReservationcodeAndPhoneNumber } from "@/api/ReservationApi";
-import axios from "axios";
-import { toast } from "react-toastify";
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import InputComponent from '../login/InputComponents';
+import ButtonComponent from '../login/ButtonComponents';
+import { getReservationReservationcodeAndPhoneNumber } from '@/api/ReservationApi';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const TrackingReservationForm = () => {
   const navigate = useNavigate();
@@ -13,11 +13,11 @@ const TrackingReservationForm = () => {
   const phoneRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    reservationCode: "",
-    phoneNumber: "",
+    reservationCode: '',
+    phoneNumber: '',
   });
 
-  const [formError, setFormError] = useState("");
+  const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,16 +30,16 @@ const TrackingReservationForm = () => {
 
   const isFormValid = () => {
     return (
-      formData.reservationCode.trim() !== "" &&
-      formData.phoneNumber.trim() !== ""
+      formData.reservationCode.trim() !== '' &&
+      formData.phoneNumber.trim() !== ''
     );
   };
 
   const handleKeyDown = (
     e: React.KeyboardEvent,
-    nextRef: React.RefObject<HTMLInputElement> | null
+    nextRef: React.RefObject<HTMLInputElement> | null,
   ) => {
-    if (e.key === "Enter" && nextRef?.current) {
+    if (e.key === 'Enter' && nextRef?.current) {
       e.preventDefault();
       nextRef.current.focus();
     }
@@ -49,37 +49,37 @@ const TrackingReservationForm = () => {
     e.preventDefault();
 
     if (!isFormValid()) {
-      setFormError("Vui lòng điền đầy đủ mã đặt bàn và số điện thoại.");
+      setFormError('Vui lòng điền đầy đủ mã đặt bàn và số điện thoại.');
       return;
     }
 
-    setFormError("");
+    setFormError('');
     setIsSubmitting(true);
 
     try {
       const data = await getReservationReservationcodeAndPhoneNumber(
         formData.reservationCode.toLowerCase(),
-        formData.phoneNumber
+        formData.phoneNumber,
       );
 
-      console.log("Reservation data:", data);
+      console.log('Reservation data:', data);
 
       if (data.success === true && data.data) {
         navigate(
-          `/reservation/lookup-reservation?reservationCode=${formData.reservationCode}&phone=${formData.phoneNumber}`
+          `/reservation/lookup-reservation?reservationCode=${formData.reservationCode}&phone=${formData.phoneNumber}`,
         );
       } else {
-        setFormError("Không tìm thấy đơn đặt bàn nào với thông tin đã nhập.");
+        setFormError('Không tìm thấy đơn đặt bàn nào với thông tin đã nhập.');
       }
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
-          toast.error("Không tìm thấy đơn đặt bàn nào với thông tin đã nhập.");
+          toast.error('Không tìm thấy đơn đặt bàn nào với thông tin đã nhập.');
         } else {
-          setFormError("Có lỗi xảy ra khi tra cứu, vui lòng thử lại.");
+          setFormError('Có lỗi xảy ra khi tra cứu, vui lòng thử lại.');
         }
       } else {
-        setFormError("Có lỗi xảy ra khi tra cứu, vui lòng thử lại.");
+        setFormError('Có lỗi xảy ra khi tra cứu, vui lòng thử lại.');
       }
     } finally {
       setIsSubmitting(false);

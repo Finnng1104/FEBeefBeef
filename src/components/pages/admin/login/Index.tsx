@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
-import InputComponent from "@/components/pages/login/InputComponents";
-import ButtonComponent from "@/components/pages/login/ButtonComponents";
+import React, { useState, useEffect, useRef } from 'react';
+import InputComponent from '@/components/pages/login/InputComponents';
+import ButtonComponent from '@/components/pages/login/ButtonComponents';
 
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../../../redux/hook";
-import { LoginUser } from "../../../../redux/feature/auth/authActions";
-import { toast } from "react-toastify";
-import { AxiosError } from "axios";
-import { fetchCurrentUser } from "@/redux/feature/user/userAction";
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../../../redux/hook';
+import { LoginUser } from '../../../../redux/feature/auth/authActions';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
+import { fetchCurrentUser } from '@/redux/feature/user/userAction';
 
 const AdminLoginPage = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [formError, setFormError] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
+    {},
   );
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const AdminLoginPage = () => {
       ...prevData,
       [name]: value,
     }));
-    setFormError("");
+    setFormError('');
   };
 
   const isEmailValid = (email: string): boolean => {
@@ -55,12 +55,12 @@ const AdminLoginPage = () => {
     let newErrors: { email?: string; password?: string } = {};
 
     if (!isEmailValid(email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = 'Email không hợp lệ';
     }
 
     if (!isPasswordValid(password)) {
       newErrors.password =
-        "Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số";
+        'Mật khẩu cần ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -75,15 +75,15 @@ const AdminLoginPage = () => {
         .then((result) => {
           const userId = result.user._id;
           dispatch(fetchCurrentUser({ userId }));
-          navigate("/admin");
+          navigate('/admin');
         });
     } catch (error) {
-      let message = "Có lỗi xảy ra";
+      let message = 'Có lỗi xảy ra';
       if (error instanceof AxiosError) {
         message = error.response?.data?.message || message;
-      } else if (typeof error === "string") {
+      } else if (typeof error === 'string') {
         message = error;
-      } else if (error && typeof error === "object" && "message" in error) {
+      } else if (error && typeof error === 'object' && 'message' in error) {
         message = (error as any).message;
       }
       toast.error(message);
@@ -94,9 +94,9 @@ const AdminLoginPage = () => {
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    nextRef?: React.RefObject<HTMLInputElement> | null
+    nextRef?: React.RefObject<HTMLInputElement> | null,
   ) => {
-    if (e.key === "Enter" && nextRef?.current) {
+    if (e.key === 'Enter' && nextRef?.current) {
       e.preventDefault();
       nextRef.current.focus();
     }
@@ -144,8 +144,8 @@ const AdminLoginPage = () => {
             <button
               type="button"
               onClick={() =>
-                navigate("/forgot-password", {
-                  state: { loginPath: "/admin/login" },
+                navigate('/forgot-password', {
+                  state: { loginPath: '/admin/login' },
                 })
               }
               className="text-sm text-white hover:text-secondaryColor hover:underline"
