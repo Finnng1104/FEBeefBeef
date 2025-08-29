@@ -57,11 +57,30 @@ const Step2Seating: React.FC<Step2SeatingProps> = ({
   const [selectedType, setSelectedType] = useState<string>(
     formData.tableCategory || '',
   );
-  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warning, setWarning] = useState<{ open: boolean; message: string }>({
+    open: false,
+    message: '',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Helper: capacity range by table type (min/max used for validation)
+  const getCapacityRange = (type: string): { min: number; max: number } => {
+    switch (type) {
+      case 'quiet':
+        return { min: 1, max: 2 }; // "2 người"
+      case 'standard':
+        return { min: 1, max: 4 }; // "4 người"
+      case 'group':
+        return { min: 4, max: 10 }; // "8–10 người" but group min rule is 4
+      case 'vip':
+        return { min: 2, max: 20 }; // "4–20 người" (allow 2+ in VIP, but cap at 20)
+      default:
+        return { min: 1, max: 99 };
+    }
+  };
 
   const handleChooseType = (type: string) => {
     setSelectedType(type);
@@ -75,9 +94,35 @@ const Step2Seating: React.FC<Step2SeatingProps> = ({
 
   const handleNextClick = () => {
     if (!selectedType) {
-      setShowWarningModal(true);
+      setWarning({
+        open: true,
+        message: 'Vui lòng chọn loại bàn trước khi tiếp tục.',
+      });
       return;
     }
+
+    const people = Number(formData.number_of_people || 0);
+    const { max } = getCapacityRange(selectedType);
+
+    // Rule 1: If under 4 people, not allowed to choose group table
+    if (people > 0 && people < 4 && selectedType === 'group') {
+      setWarning({
+        open: true,
+        message:
+          'Bàn nhóm yêu cầu tối thiểu 4 người. Vui lòng chọn loại bàn khác.',
+      });
+      return;
+    }
+
+    // Rule 2: If number of people exceeds the table type max capacity -> block
+    if (people > 0 && people > max) {
+      setWarning({
+        open: true,
+        message: `Số người (${people}) vượt quá sức chứa tối đa của loại bàn này (${max}). Vui lòng chọn loại bàn phù hợp.`,
+      });
+      return;
+    }
+
     onNext();
   };
 
@@ -159,12 +204,12 @@ const Step2Seating: React.FC<Step2SeatingProps> = ({
       </div>
 
       {/* Modal cảnh báo khi chưa chọn loại bàn */}
-      {showWarningModal && (
+      {warning.open && (
         <GlobalModal>
           <div className="relative bg-headerBackground border-2 border-[#F9D783] rounded-2xl shadow-2xl w-full max-w-2xl p-0 overflow-hidden">
             <button
               className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-[#F9D783] text-[#1a2233] text-2xl font-bold shadow cursor-pointer transition z-10"
-              onClick={() => setShowWarningModal(false)}
+              onClick={() => setWarning({ open: false, message: '' })}
               aria-label="Đóng"
             >
               ×
@@ -173,15 +218,13 @@ const Step2Seating: React.FC<Step2SeatingProps> = ({
               <h2 className="text-3xl text-[#F9D783] mb-4 font-serif tracking-wide">
                 Thông báo
               </h2>
-              <p className="text-lg mb-6">
-                Vui lòng chọn loại bàn trước khi tiếp tục.
-              </p>
+              <p className="text-lg mb-6">{warning.message}</p>
               <div className="flex justify-center mt-8">
                 <ButtonComponents
                   variant="filled"
                   size="large"
                   className="w-40"
-                  onClick={() => setShowWarningModal(false)}
+                  onClick={() => setWarning({ open: false, message: '' })}
                 >
                   OK
                 </ButtonComponents>
