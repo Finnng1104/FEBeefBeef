@@ -3,21 +3,16 @@ import { useParams } from 'react-router-dom';
 import PostsApi from '../api/PostsApi';
 import { PostType } from '../types/PostType';
 import PostSidebar from '../components/pages/posts/PostSidebar';
-import Post from '../components/pages/posts/Post';
-import Container from '@/components/common/Container';
 import { usePosts } from '../hooks/usePosts';
+import PostListSection from '../components/pages/posts/PostListSection';
+import { FaDiamond } from 'react-icons/fa6';
 
 const PostsByTagPage = () => {
   const { tag } = useParams<{ tag: string }>();
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const {
-    data: postsData,
-    isLoading,
-    searchParams,
-    setSearchParams,
-  } = usePosts();
+  const { isLoading, searchParams, setSearchParams } = usePosts();
 
   const searchValue = searchParams.get('search') || '';
 
@@ -34,52 +29,59 @@ const PostsByTagPage = () => {
   const displayPosts = posts;
 
   return (
-    <div className="bg-bodyBackground min-h-screen text-white">
-      <Container>
-        <div className="max-w-[1500px] py-10 px-4">
-          <div className="flex flex-col lg:flex-row gap-10">
-            <div className="lg:w-1/4 w-full h-fit">
-              <div className="sticky top-[120px] self-start">
-                <PostSidebar
-                  onSearch={(value) => {
-                    setSearchParams((prev) => {
-                      const newParams = new URLSearchParams(prev);
-                      if (value) {
-                        newParams.set('search', value);
-                      } else {
-                        newParams.delete('search');
-                      }
-                      newParams.delete('page');
-                      return newParams;
-                    });
-                  }}
-                />
+    <section className="min-h-screen bg-bodyBackground py-8 sm:py-16 text-white">
+      <div className="w-11/12 md:w-container95 lg:w-container95 xl:w-container95 2xl:w-mainContainer mx-auto">
+        <img
+          src="/assets/images/home/IconOnline.svg"
+          alt="Icon"
+          className="mx-auto mb-8"
+        />
+
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-restora font-thin mb-4">
+            Bài Viết Theo Thẻ
+          </h1>
+          <h2 className="text-xs sm:text-sm md:text-base flex justify-center items-center font-sans font-extralight uppercase tracking-widest mb-4 text-secondaryColor">
+            <FaDiamond className="inline mr-2" style={{ fontSize: '7px' }} />
+            {tag}
+            <FaDiamond className="inline ml-2" style={{ fontSize: '7px' }} />
+          </h2>
+        </div>
+
+        <div className="space-y-8">
+          <div className="w-full">
+            <PostSidebar
+              placement="top"
+              onSearch={(value) => {
+                setSearchParams((prev) => {
+                  const newParams = new URLSearchParams(prev);
+                  if (value) {
+                    newParams.set('search', value);
+                  } else {
+                    newParams.delete('search');
+                  }
+                  newParams.delete('page');
+                  return newParams;
+                });
+              }}
+            />
+          </div>
+
+          <div className="w-full">
+            {loading || isLoading ? (
+              <div className="text-center text-gray-300">Đang tải bài viết...</div>
+            ) : displayPosts.length > 0 ? (
+              <PostListSection posts={displayPosts} isLoading={false} />
+            ) : (
+              <div className="text-center text-gray-400">
+                Không có bài viết nào{' '}
+                {searchValue ? 'phù hợp với tìm kiếm.' : 'với thẻ này.'}
               </div>
-            </div>
-
-            <div className="w-full lg:w-3/4">
-              <h2 className="text-2xl font-bold mb-6 text-secondaryColor">
-                Bài viết với thẻ: <span className="text-white">{tag}</span>
-              </h2>
-
-              {(loading || isLoading) ? (
-                <div className="text-white">Đang tải...</div>
-              ) : displayPosts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  {displayPosts.map((post) => (
-                    <Post key={post._id} post={post} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-white">
-                  Không có bài viết nào {searchValue ? 'phù hợp với tìm kiếm.' : 'với thẻ này.'}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
-      </Container>
-    </div>
+      </div>
+    </section>
   );
 };
 

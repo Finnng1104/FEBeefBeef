@@ -7,7 +7,10 @@ interface PostListSectionProps {
   isLoading?: boolean;
 }
 
-const PostListSection: React.FC<PostListSectionProps> = ({ posts, isLoading }) => {
+const PostListSection: React.FC<PostListSectionProps> = ({
+  posts,
+  isLoading,
+}) => {
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-16">
@@ -15,13 +18,23 @@ const PostListSection: React.FC<PostListSectionProps> = ({ posts, isLoading }) =
       </div>
     );
   }
-  // Không cần filter lại, backend đã trả về đúng bài published
+
+  if (posts.length === 0) {
+    return (
+      <div className="w-full py-14 text-center text-gray-400">
+        Hiện chưa có bài viết phù hợp.
+      </div>
+    );
+  }
+
   return (
-    <section className="bg-bodyBackground text-white ">
+    <section className="text-white">
       <div className="w-full mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {posts.map((post) => (
-            <Post key={post._id} post={post} />
+            <div key={post._id} className="h-full">
+              <Post post={post} />
+            </div>
           ))}
         </div>
       </div>
